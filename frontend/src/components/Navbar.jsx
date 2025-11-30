@@ -31,7 +31,7 @@ export const Navbar = () => {
           <Link to="/" className="flex items-center gap-2" data-testid="logo-link">
             <Heart className="w-8 h-8 text-blue-500" />
             <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
-              ZenMentor
+              MindSpace
             </span>
           </Link>
 

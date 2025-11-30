@@ -10,7 +10,7 @@ export const Footer = () => {
             <div className="flex items-center gap-2 mb-4">
               <Heart className="w-6 h-6 text-blue-500" />
               <span className="text-lg font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
-                ZenMentor
+                MindSpace
               </span>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -32,18 +32,18 @@ export const Footer = () => {
             <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4" />
-                support@zenmentor.com
+                support@mindspace.com
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4" />
-                1-800-ZENMENT
+                (123) 456-7890
               </li>
             </ul>
           </div>
         </div>
 
         <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-700 text-center text-sm text-slate-600 dark:text-slate-400">
-          <p>&copy; {new Date().getFullYear()} ZenMentor. All rights reserved. Made with care for your mental wellness.</p>
+          <p>&copy; {new Date().getFullYear()} MindSpace. All rights reserved. Made with care for your mental wellness.</p>
         </div>
       </div>
     </footer>

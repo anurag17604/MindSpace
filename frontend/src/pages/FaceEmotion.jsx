@@ -34,6 +34,7 @@ export default function FaceEmotion() {
       toast.success('Face detection models loaded');
     } catch (error) {
       console.error('Error loading models:', error);
+      
       toast.error('Failed to load face detection models');
     }
   };
