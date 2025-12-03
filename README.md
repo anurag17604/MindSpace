@@ -239,22 +239,6 @@ vercel
 - ✅ Framer Motion Animations
 - ✅ Premium UI/UX
 
-## 🔥 Team Contribution (3 Members)
-
-### 👤 Arnav Garg
-- Implemented Face Emotion Detection UI
-- Integrated face-api.js
-- Handled model conversion (ONNX)
-
-### 👤 Member 2 (Name)
-- Developed Text Summarizer Module
-- Integrated DistilBART model APIs
-- Added video generation (Veo 3 API)
-
-### 👤 Member 3 (Name)
-- Implemented Text Emotion Analysis
-- Worked on backend SQL demo
-- Chatbot integration and UI polishing
 
 ## 📝 Notes
 
