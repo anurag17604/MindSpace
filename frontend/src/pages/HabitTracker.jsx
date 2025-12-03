@@ -1,87 +1,92 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { Plus, Trash2, Check, Flame } from 'lucide-react';
+import { Plus, Trash2, Check, Flame, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import axios from 'axios';
 
 export default function HabitTracker() {
-  const [habits, setHabits] = useLocalStorage('habits', []);
-  const [newHabitName, setNewHabitName] = useState('');
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+   const [habits, setHabits] = useState([]);
+   const [newHabitName, setNewHabitName] = useState('');
+   const [isDialogOpen, setIsDialogOpen] = useState(false);
+   const [loading, setLoading] = useState(false);
+   const [saving, setSaving] = useState(false);
 
-  const addHabit = () => {
-    if (!newHabitName.trim()) {
-      toast.error('Please enter a habit name');
-      return;
-    }
+   useEffect(() => {
+      fetchHabits();
+   }, []);
 
-    const newHabit = {
-      id: Date.now(),
-      name: newHabitName,
-      createdAt: new Date().toISOString(),
-      completions: []
-    };
-
-    setHabits([...habits, newHabit]);
-    setNewHabitName('');
-    setIsDialogOpen(false);
-    toast.success('Habit added!');
-  };
-
-  const deleteHabit = (habitId) => {
-    setHabits(habits.filter(h => h.id !== habitId));
-    toast.success('Habit deleted');
-  };
-
-  const toggleHabitCompletion = (habitId) => {
-    const today = new Date().toDateString();
-    
-    setHabits(habits.map(habit => {
-      if (habit.id === habitId) {
-        const completions = habit.completions || [];
-        const todayIndex = completions.indexOf(today);
-        
-        if (todayIndex > -1) {
-          return {
-            ...habit,
-            completions: completions.filter((_, i) => i !== todayIndex)
-          };
-        } else {
-          return {
-            ...habit,
-            completions: [...completions, today]
-          };
-        }
+   const fetchHabits = async () => {
+      setLoading(true);
+      try {
+         const response = await axios.get('/api/habits');
+         setHabits(response.data);
+      } catch (error) {
+         toast.error('Failed to load habits');
+      } finally {
+         setLoading(false);
       }
-      return habit;
-    }));
+   };
+
+   const addHabit = async () => {
+     if (!newHabitName.trim()) {
+       toast.error('Please enter a habit name');
+       return;
+     }
+
+     setSaving(true);
+     try {
+       await axios.post('/api/habits', { name: newHabitName });
+       setNewHabitName('');
+       setIsDialogOpen(false);
+       toast.success('Habit added!');
+       fetchHabits();
+     } catch (error) {
+       toast.error('Failed to add habit');
+     } finally {
+       setSaving(false);
+     }
+   };
+
+  const deleteHabit = async (habitId) => {
+    try {
+      await axios.delete(`/api/habits/${habitId}`);
+      toast.success('Habit deleted');
+      fetchHabits();
+    } catch (error) {
+      toast.error('Failed to delete habit');
+    }
+  };
+
+  const toggleHabitCompletion = async (habitId) => {
+    try {
+      await axios.post(`/api/habits/${habitId}/toggle`);
+      fetchHabits();
+    } catch (error) {
+      toast.error('Failed to update habit');
+    }
   };
 
   const isCompletedToday = (habit) => {
-    const today = new Date().toDateString();
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     return (habit.completions || []).includes(today);
   };
 
   const getStreak = (habit) => {
-    const completions = (habit.completions || []).map(d => new Date(d)).sort((a, b) => b - a);
+    const completions = (habit.completions || []).sort((a, b) => b.localeCompare(a));
     if (completions.length === 0) return 0;
 
     let streak = 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = new Date().toISOString().split('T')[0];
 
     for (let i = 0; i < completions.length; i++) {
       const checkDate = new Date(today);
       checkDate.setDate(checkDate.getDate() - i);
-      checkDate.setHours(0, 0, 0, 0);
+      const checkDateStr = checkDate.toISOString().split('T')[0];
 
-      const completionDate = new Date(completions[i]);
-      completionDate.setHours(0, 0, 0, 0);
-
-      if (completionDate.getTime() === checkDate.getTime()) {
+      if (completions[i] === checkDateStr) {
         streak++;
       } else {
         break;
@@ -93,7 +98,7 @@ export default function HabitTracker() {
 
   const getCompletionRate = (habit) => {
     const daysSinceCreated = Math.floor(
-      (new Date() - new Date(habit.createdAt)) / (1000 * 60 * 60 * 24)
+      (new Date() - new Date(habit.created_at)) / (1000 * 60 * 60 * 24)
     ) + 1;
     const completions = (habit.completions || []).length;
     return Math.round((completions / daysSinceCreated) * 100);
@@ -142,19 +147,36 @@ export default function HabitTracker() {
                   placeholder="e.g., Morning meditation"
                   onKeyDown={(e) => e.key === 'Enter' && addHabit()}
                 />
-                <Button 
+                <Button
                   data-testid="save-habit-button"
-                  onClick={addHabit} 
+                  onClick={addHabit}
+                  disabled={saving}
                   className="w-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
                 >
-                  Add Habit
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    'Add Habit'
+                  )}
                 </Button>
               </div>
             </DialogContent>
           </Dialog>
         </motion.div>
 
-        {habits.length === 0 ? (
+        {loading ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-16 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-slate-700"
+          >
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+            <p className="text-slate-600 dark:text-slate-400">Loading habits...</p>
+          </motion.div>
+        ) : habits.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}

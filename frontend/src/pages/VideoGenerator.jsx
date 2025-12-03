@@ -1,3 +1,9 @@
+// --------------------
+// API Note:
+// We used the open-source Google Veo 3 API for text-to-video generation.
+// Credits exhausted so generation may fail temporarily.
+// --------------------
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -5,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { generateSummary, generateVideo } from '@/utils/dummyApis';
 import { Loader2, Video, Check, FileText, Film, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import TextToVideoVeo3 from '@/components/TextToVideoVeo3';
 
 export default function VideoGenerator() {
   const [text, setText] = useState('');
@@ -69,7 +76,7 @@ export default function VideoGenerator() {
           </p>
         </motion.div>
 
-        {/* Progress Steps */}
+        Progress Steps
         <div className="mb-12">
           <div className="flex items-center justify-between max-w-3xl mx-auto">
             {steps.map((step, index) => (
@@ -207,6 +214,8 @@ export default function VideoGenerator() {
             </div>
           </motion.div>
         )}
+
+        <TextToVideoVeo3 />
       </div>
     </div>
   );

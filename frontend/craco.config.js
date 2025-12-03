@@ -68,6 +68,19 @@ const webpackConfig = {
         webpackConfig.plugins.push(healthPluginInstance);
       }
 
+      // Exclude face-api.js from source-map-loader to prevent warnings
+      webpackConfig.module.rules = webpackConfig.module.rules.map(rule => {
+        if (rule.use && rule.use.some(u => u.loader && u.loader.includes('source-map'))) {
+          if (!rule.exclude) rule.exclude = [];
+          if (Array.isArray(rule.exclude)) {
+            rule.exclude.push(/node_modules\/face-api\.js/);
+          } else {
+            rule.exclude = [rule.exclude, /node_modules\/face-api\.js/];
+          }
+        }
+        return rule;
+      });
+
       return webpackConfig;
     },
   },

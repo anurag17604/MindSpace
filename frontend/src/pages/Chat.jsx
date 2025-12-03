@@ -1,9 +1,11 @@
+// --------------------
+// Frontend-only chat to display sent messages
+// --------------------
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ref, push, onValue, off } from 'firebase/database';
-import { database } from '@/firebase/config';
 import { Send, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -23,60 +25,24 @@ export default function Chat() {
     localStorage.setItem('anonymous-username', generated);
     return generated;
   });
-  const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef(null);
-  const chatRef = ref(database, 'chat');
-
-  useEffect(() => {
-    try {
-      // Listen for new messages
-      const unsubscribe = onValue(chatRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          const messageList = Object.values(data).sort((a, b) => a.timestamp - b.timestamp);
-          setMessages(messageList);
-          setIsConnected(true);
-        }
-      }, (error) => {
-        console.error('Firebase error:', error);
-        setIsConnected(false);
-        toast.error('Unable to connect to chat. Please check Firebase configuration.');
-      });
-
-      return () => {
-        off(chatRef);
-      };
-    } catch (error) {
-      console.error('Firebase initialization error:', error);
-      setIsConnected(false);
-    }
-  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const sendMessage = async () => {
+  const sendMessage = () => {
     if (!newMessage.trim()) return;
 
-    if (!isConnected) {
-      toast.error('Chat is not connected. Please check Firebase configuration.');
-      return;
-    }
+    const message = {
+      text: newMessage,
+      username,
+      timestamp: Date.now()
+    };
 
-    try {
-      const message = {
-        text: newMessage,
-        username,
-        timestamp: Date.now()
-      };
-
-      await push(chatRef, message);
-      setNewMessage('');
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast.error('Failed to send message');
-    }
+    setMessages(prev => [...prev, message]);
+    setNewMessage('');
+    toast.success('Message sent!');
   };
 
   const formatTime = (timestamp) => {
@@ -92,10 +58,10 @@ export default function Chat() {
           className="text-center mb-8"
         >
           <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
-            Anonymous Chat
+            ANONYMOUS CHAT
           </h1>
           <p className="text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mb-4">
-            Connect with others in a safe, anonymous community. Share your thoughts without judgment.
+           Chat freely and anonymously with others in this safe space. Your identity is hidden, so feel free to express yourself!
           </p>
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm">
             <Users className="w-4 h-4" />
@@ -109,13 +75,6 @@ export default function Chat() {
           transition={{ delay: 0.1 }}
           className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden"
         >
-          {/* Connection Status */}
-          {!isConnected && (
-            <div className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 px-4 py-2 text-sm text-center">
-              ⚠️ Chat is not connected. Please update Firebase configuration in /app/frontend/src/firebase/config.js
-            </div>
-          )}
-
           {/* Messages */}
           <div className="h-[500px] overflow-y-auto p-6 space-y-4" data-testid="chat-messages">
             {messages.length === 0 ? (
@@ -164,13 +123,12 @@ export default function Chat() {
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                 placeholder="Type your message..."
-                disabled={!isConnected}
                 className="flex-1"
               />
               <Button
                 data-testid="send-message-button"
                 onClick={sendMessage}
-                disabled={!isConnected || !newMessage.trim()}
+                disabled={!newMessage.trim()}
                 className="rounded-full px-6 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
               >
                 <Send className="w-4 h-4" />

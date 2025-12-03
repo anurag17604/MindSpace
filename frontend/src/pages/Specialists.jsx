@@ -10,52 +10,52 @@ import { toast } from 'sonner';
 const specialists = [
   {
     id: 1,
-    name: 'Dr. Sarah Mitchell',
+    name: 'Dr. Aditi Sharma',
     expertise: 'Anxiety & Depression',
     rating: 4.9,
     experience: '15+ years',
     availability: 'Available',
-    price: '$120/session',
+    price: 'Rs 1200/session',
     image: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=200&h=200&fit=crop'
   },
   {
     id: 2,
-    name: 'Dr. James Chen',
+    name: 'Dr. Ankur Verma',
     expertise: 'Trauma & PTSD',
     rating: 4.8,
     experience: '12+ years',
     availability: 'Available',
-    price: '$150/session',
+    price: 'Rs 1500/session',
     image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=200&h=200&fit=crop'
   },
   {
     id: 3,
-    name: 'Dr. Emily Rodriguez',
+    name: 'Dr. Radhika Menon',
     expertise: 'Relationship Counseling',
     rating: 4.9,
     experience: '10+ years',
     availability: 'Limited',
-    price: '$130/session',
+    price: 'Rs. 1300/session',
     image: 'https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=200&h=200&fit=crop'
   },
   {
     id: 4,
-    name: 'Dr. Michael Thompson',
+    name: 'Dr. Vikram Singh',
     expertise: 'Stress & Burnout',
     rating: 4.7,
     experience: '8+ years',
     availability: 'Available',
-    price: '$110/session',
+    price: 'Rs. 1100/session',
     image: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=200&h=200&fit=crop'
   },
   {
     id: 5,
-    name: 'Dr. Lisa Park',
+    name: 'Dr. Sonal Gupta',
     expertise: 'Mindfulness & Meditation',
     rating: 5.0,
     experience: '20+ years',
     availability: 'Limited',
-    price: '$140/session',
+    price: 'Rs. 1400/session',
     image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop'
   },
   {
@@ -65,7 +65,7 @@ const specialists = [
     rating: 4.8,
     experience: '18+ years',
     availability: 'Available',
-    price: '$160/session',
+    price: 'Rs. 1600/session',
     image: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=200&h=200&fit=crop'
   },
 ];

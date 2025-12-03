@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Smile, Meh, Frown, Calendar } from 'lucide-react';
+import { Smile, Meh, Frown, Calendar, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import axios from 'axios';
 
 const moodEmojis = [
   { emoji: '😊', label: 'Great', value: 5, color: '#10b981' },
@@ -16,31 +16,65 @@ const moodEmojis = [
 ];
 
 export default function MoodTracker() {
-  const [moods, setMoods] = useLocalStorage('mood-entries', []);
-  const [selectedMood, setSelectedMood] = useState(null);
-  const [notes, setNotes] = useState('');
-  const [filterDays, setFilterDays] = useState(7);
+   const [moods, setMoods] = useState([]);
+   const [selectedMood, setSelectedMood] = useState(null);
+   const [notes, setNotes] = useState('');
+   const [filterDays, setFilterDays] = useState(7);
+   const [loading, setLoading] = useState(false);
+   const [saving, setSaving] = useState(false);
 
-  const handleSaveMood = () => {
-    if (!selectedMood) {
-      toast.error('Please select a mood');
-      return;
-    }
+   useEffect(() => {
+      fetchMoods();
+   }, [filterDays]);
 
-    const newMood = {
-      id: Date.now(),
-      mood: selectedMood,
-      notes,
-      date: new Date().toISOString(),
-      dateStr: new Date().toLocaleDateString(),
-      timeStr: new Date().toLocaleTimeString()
-    };
+   const fetchMoods = async () => {
+      setLoading(true);
+      try {
+         const response = await axios.get(`/api/moods?days=${filterDays}`);
+         const formattedMoods = response.data.map(mood => ({
+            id: mood.id,
+            mood: {
+               value: mood.mood_value,
+               label: mood.mood_label,
+               emoji: mood.mood_emoji
+            },
+            notes: mood.notes,
+            date: mood.date,
+            dateStr: new Date(mood.date).toLocaleDateString(),
+            timeStr: new Date(mood.date).toLocaleTimeString()
+         }));
+         setMoods(formattedMoods);
+      } catch (error) {
+         toast.error('Failed to load mood entries');
+      } finally {
+         setLoading(false);
+      }
+   };
 
-    setMoods([...moods, newMood]);
-    setSelectedMood(null);
-    setNotes('');
-    toast.success('Mood entry saved!');
-  };
+   const handleSaveMood = async () => {
+     if (!selectedMood) {
+       toast.error('Please select a mood');
+       return;
+     }
+
+     setSaving(true);
+     try {
+       await axios.post('/api/moods', {
+         mood_value: selectedMood.value,
+         mood_label: selectedMood.label,
+         mood_emoji: selectedMood.emoji,
+         notes
+       });
+       setSelectedMood(null);
+       setNotes('');
+       toast.success('Mood entry saved!');
+       fetchMoods(); // Refresh the list
+     } catch (error) {
+       toast.error('Failed to save mood entry');
+     } finally {
+       setSaving(false);
+     }
+   };
 
   const getFilteredMoods = () => {
     const cutoffDate = new Date();
@@ -118,10 +152,20 @@ export default function MoodTracker() {
             <Button
               data-testid="save-mood-button"
               onClick={handleSaveMood}
+              disabled={saving}
               className="w-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
             >
-              <Calendar className="w-4 h-4 mr-2" />
-              Save Mood Entry
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Save Mood Entry
+                </>
+              )}
             </Button>
           </motion.div>
 
@@ -152,7 +196,13 @@ export default function MoodTracker() {
             </div>
 
             <div className="space-y-3 max-h-[400px] overflow-y-auto">
-              {getFilteredMoods().sort((a, b) => new Date(b.date) - new Date(a.date)).map((entry, index) => (
+               {loading ? (
+                  <div className="text-center py-8">
+                     <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
+                     <p className="text-slate-500 dark:text-slate-400">Loading mood entries...</p>
+                  </div>
+               ) : (
+                  getFilteredMoods().sort((a, b) => new Date(b.date) - new Date(a.date)).map((entry, index) => (
                 <motion.div
                   key={entry.id}
                   initial={{ opacity: 0, y: 10 }}
@@ -179,8 +229,9 @@ export default function MoodTracker() {
                     </div>
                   </div>
                 </motion.div>
-              ))}
-              {getFilteredMoods().length === 0 && (
+                 ))
+              )}
+              {!loading && getFilteredMoods().length === 0 && (
                 <div className="text-center py-12 text-slate-500 dark:text-slate-400">
                   No mood entries yet. Start tracking your mood!
                 </div>
