@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # MindSpace - Mental Health Support Web Application
 
 A comprehensive, production-ready mental health support platform built with React, featuring AI-powered tools, tracking features, and anonymous community chat.
@@ -279,3 +280,6 @@ This application is designed to support mental wellness. Remember: you're not al
 **License:** MIT  
 **Version:** 1.0.0  
 **Last Updated:** 2025
+=======
+# MindSpace
+>>>>>>> 220f3e3c20977a8a6904e4697104b00d7557980b
