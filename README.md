@@ -1,7 +1,7 @@
 <<<<<<< HEAD
 # MindSpace - Mental Health Support Web Application
 
-A comprehensive, production-ready mental health support platform built with React, featuring AI-powered tools, tracking features, and anonymous community chat.
+A comprehensive, production ready mental health support platform built with React, featuring AI-powered tools, tracking features, and anonymous community chat.
 
 ## 🌟 Features
 
